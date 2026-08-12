@@ -116,6 +116,9 @@ Check an item only after its relevant tests or live evidence pass.
 - [x] Add large-scene performance and response-size fixtures comparing focused
       direct reads, bounded projections, and broad `.asData` extraction.
 - [x] Add and validate a Code Mode skill using version-matched prepared Houdini help.
+- [x] Add and live-test a bounded generic parameter-reference audit using direct
+      HOM references plus `ch*()` expression/raw fallback, with internal,
+      external, absolute-internal, and unresolved classification.
 
 ## Phase 3 — operational hardening
 
@@ -163,11 +166,21 @@ Check an item only after its relevant tests or live evidence pass.
 - [x] Add and live-test a no-effect package/update planner that reports
       filesystem/library preconditions, external references, ordered future
       effects, and rollback limits without changing the definition or library.
-- [ ] Add package/update mutation and explicit library-write confirmation.
+- [x] Add and live-test `ctx.hda.package_copy`: stage one definition into an
+      explicit external destination library and atomically publish it without
+      installing that destination or saving the HIP.
+- [ ] Add broad HDA package/update/create mutation. The completed package-copy
+      primitive is deliberately narrower and does not update the source
+      definition, create an HDA, or mutate sections/tools.
 - [x] Add and test a no-effect parameter-template promotion planner.
-- [ ] Add parameter-template promotion mutation and library update.
+- [x] Add and live-test durable isolated `ctx.hda.apply_promotion`, requiring
+      `allow_library_write=True`, an exact explicitly owned external library,
+      and a sole verified instance before it writes the definition/library.
+- [ ] Add broad parameter-template/interface mutation. Promotion apply remains
+      intentionally scoped and does not establish general HDA update parity.
 - [x] Report artifact file and restored-scene side effects explicitly.
-- [ ] Report library side effects explicitly once library mutation is introduced.
+- [x] Report package-copy and promotion library/scene mutation events, before/
+      after file manifests, install state, and `hip_saved=False` explicitly.
 
 ## Phase 6 — sharing decision
 

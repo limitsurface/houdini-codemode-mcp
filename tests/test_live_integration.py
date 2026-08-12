@@ -724,6 +724,74 @@ finally:
     assert verify["data"]["value"] is True
 
 
+def test_live_cop_export_limit_preserves_existing_file_and_cleans_temp() -> None:
+    token = uuid.uuid4().hex[:10]
+    name = f"codemode_cop_file_failure_{token}"
+    path = f"/img/{name}"
+    output_path = str(Path(os.environ["TEMP"]) / f"houdini-codemode-{token}.exr")
+    source = r'''
+import glob
+import os
+parent = hou.node('/img').createNode('copnet', args['name'])
+sentinel = b'preserve-existing-target'
+with open(args['output_path'], 'wb') as stream:
+    stream.write(sentinel)
+try:
+    source_node = parent.createNode('constant', 'constant1')
+    error_type = None
+    error_message = None
+    try:
+        ctx.cop_files.export_image(
+            source_node,
+            args['output_path'],
+            overwrite=True,
+            max_bytes=1,
+        )
+    except Exception as exc:
+        error_type = exc.__class__.__name__
+        error_message = str(exc)
+    with open(args['output_path'], 'rb') as stream:
+        preserved = stream.read() == sentinel
+    temp_pattern = os.path.join(
+        os.path.dirname(args['output_path']),
+        '.hcm-cop-*' + os.path.splitext(args['output_path'])[1],
+    )
+    result.emit({
+        'error_type': error_type,
+        'error_message': error_message,
+        'preserved': preserved,
+        'temp_files': glob.glob(temp_pattern),
+        'helper_removed': parent.node('_hcm_export_image') is None,
+    })
+finally:
+    parent.destroy()
+    if os.path.isfile(args['output_path']):
+        os.remove(args['output_path'])
+'''
+
+    response = Controller().run(
+        source,
+        args={"name": name, "output_path": output_path},
+        policy={"label": "Houdini Code Mode COP failed export preservation proof"},
+    )
+
+    assert response["ok"] is True
+    value = response["data"]["value"]
+    assert value["error_type"] == "ValueError"
+    assert "1-byte limit" in value["error_message"]
+    assert value["preserved"] is True
+    assert value["temp_files"] == []
+    assert value["helper_removed"] is True
+    assert response["meta"]["mutation"]["events"] == []
+    assert not Path(output_path).exists()
+
+    verify = Controller().run(
+        "result.emit(hou.node(args['path']) is None)", args={"path": path}
+    )
+    assert verify["ok"] is True
+    assert verify["data"]["value"] is True
+
+
 def test_live_hda_discovery_and_instance_inspection_cleanup() -> None:
     token = uuid.uuid4().hex[:10]
     name = f"codemode_hda_{token}"

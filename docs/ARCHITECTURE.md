@@ -540,11 +540,13 @@ errors, and oversized data remain bounded.
 
 - bounded read-only HDA instance/definition/library inspection;
 - bounded HDA validation and no-effect validation plans;
-- external-reference audit and promotion planning;
+- generic and HDA-scoped external-reference auditing plus promotion planning;
 - no-effect package/update planning;
 - transactional Copernicus image file effects;
-- package/update workflows;
-- parameter-template promotion mutation;
+- narrowly scoped staged HDA package copy to an unloaded external library;
+- isolated parameter-template promotion with explicit owned-library consent and
+  a pre-synchronization content checkpoint;
+- broad HDA create/update, section/tool, and multi-instance workflows remain;
 - mutation dry-run plans and explicit library event reporting.
 
 ### Phase 6: sharing decision

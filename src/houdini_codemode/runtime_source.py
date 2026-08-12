@@ -9,12 +9,15 @@ from .runtime_cop_file_source import COP_FILE_SOURCE
 from .runtime_cop_source import COP_SOURCE
 from .runtime_geometry_source import GEOMETRY_SOURCE
 from .runtime_hda_source import HDA_SOURCE
+from .runtime_hda_package_source import HDA_PACKAGE_SOURCE
+from .runtime_hda_promotion_apply_source import HDA_PROMOTION_APPLY_SOURCE
 from .runtime_hda_promotion_source import HDA_PROMOTION_SOURCE
 from .runtime_hda_reference_source import HDA_REFERENCE_SOURCE
 from .runtime_hda_update_source import HDA_UPDATE_SOURCE
 from .runtime_help_source import HELP_SOURCE
 from .runtime_lop_source import LOP_SOURCE
 from .runtime_opencl_source import OPENCL_SOURCE
+from .runtime_parm_reference_source import PARM_REFERENCE_SOURCE
 from .runtime_python_source import PYTHON_SOURCE
 from .runtime_wrangle_source import WRANGLE_SOURCE
 
@@ -1350,6 +1353,7 @@ class _HCMContext:
         self.session = _HCMSessionService()
         self.nodes = _HCMNodeService()
         self.parms = _HCMParmService()
+        self.parm_references = _HCMParmReferenceService()
         self.geometry = _HCMGeometryService()
         self.cop = _HCMCopService()
         self.cop_files = _HCMCopFileService(mutation_events)
@@ -1669,6 +1673,7 @@ def _houdini_codemode_execute_json(request_json):
 '''
 
 RUNTIME_SOURCE += "\n" + OPENCL_SOURCE
+RUNTIME_SOURCE += "\n" + PARM_REFERENCE_SOURCE
 RUNTIME_SOURCE += "\n" + PYTHON_SOURCE
 RUNTIME_SOURCE += "\n" + WRANGLE_SOURCE
 RUNTIME_SOURCE += "\n" + ARTIFACT_SOURCE
@@ -1680,5 +1685,7 @@ RUNTIME_SOURCE += "\n" + HDA_SOURCE
 RUNTIME_SOURCE += "\n" + HDA_REFERENCE_SOURCE
 RUNTIME_SOURCE += "\n" + HDA_PROMOTION_SOURCE
 RUNTIME_SOURCE += "\n" + HDA_UPDATE_SOURCE
+RUNTIME_SOURCE += "\n" + HDA_PROMOTION_APPLY_SOURCE
+RUNTIME_SOURCE += "\n" + HDA_PACKAGE_SOURCE
 RUNTIME_SOURCE += "\n" + HELP_SOURCE
 RUNTIME_SOURCE_HASH = hashlib.sha256(RUNTIME_SOURCE.encode("utf-8")).hexdigest()

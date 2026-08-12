@@ -32,6 +32,13 @@ CAPABILITIES: tuple[dict[str, Any], ...] = (
         ),
     },
     {
+        "name": "ctx.parm_references",
+        "purpose": "Bounded read-only parameter dependency traversal and classification.",
+        "methods": (
+            ("references(node, descendants=False, external_to=None, max_nodes=1000, max_parms=10000, max_results=1000, max_errors=100)", "read", "Classify direct and channel-expression parameter dependencies."),
+        ),
+    },
+    {
         "name": "ctx.geometry",
         "purpose": "Bounded cooked-geometry summaries and attribute samples.",
         "methods": (
@@ -72,6 +79,8 @@ CAPABILITIES: tuple[dict[str, Any], ...] = (
             ("validate(node, fresh=False, cook=False, frames=None, strict=False, external_references=False, dry_run=False, max_items=1000)", "read/cook/temp-mutation", "Interface/cook/reference validation."),
             ("plan_promotion(node, internal_parms, destination_names=None, folder=None, max_items=25)", "read", "No-effect parameter promotion plan."),
             ("plan_update(node, mode='update', library=None, type_name=None, label=None, contents=True, interface=False, preserve_sections=True, preserve_tools=True, reference_audit=True, overwrite=False, match_current=False, create_backup=True, max_items=100)", "read", "No-effect HDA definition update/copy plan."),
+            ("apply_promotion(node, internal_parms, destination_names, folder=None, max_items=25, allow_library_write=False, owned_library=None, create_backup=True)", "library-write/scene-mutation", "Promote internal parameters into one explicitly owned isolated HDA definition."),
+            ("package_copy(node, destination_library, type_name=None, label=None, overwrite=False, backup=False, max_items=100)", "file-write", "Stage and atomically publish one HDA definition without installing it."),
         ),
     },
     {

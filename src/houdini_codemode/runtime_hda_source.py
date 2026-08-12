@@ -558,6 +558,48 @@ class _HCMHdaService:
             max_items=max_items,
         )
 
+    def apply_promotion(
+        self,
+        node,
+        internal_parms,
+        destination_names,
+        folder=None,
+        max_items=25,
+        allow_library_write=False,
+        owned_library=None,
+        create_backup=True,
+    ):
+        return _HCMHdaPromotionApplyService(self._mutation_events).apply(
+            node,
+            internal_parms,
+            destination_names,
+            folder=folder,
+            max_items=max_items,
+            allow_library_write=allow_library_write,
+            owned_library=owned_library,
+            create_backup=create_backup,
+        )
+
+    def package_copy(
+        self,
+        node,
+        destination_library,
+        type_name=None,
+        label=None,
+        overwrite=False,
+        backup=False,
+        max_items=100,
+    ):
+        return _HCMHdaPackageService(self._mutation_events).copy(
+            node,
+            destination_library,
+            type_name=type_name,
+            label=label,
+            overwrite=overwrite,
+            backup=backup,
+            max_items=max_items,
+        )
+
     def validate(
         self,
         node,
