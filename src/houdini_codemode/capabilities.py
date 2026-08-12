@@ -92,6 +92,50 @@ CAPABILITIES: tuple[dict[str, Any], ...] = (
         ),
     },
     {
+        "name": "ctx.hda_sections",
+        "purpose": "Plan, read, set, or delete bounded plain-text sections in one explicitly owned HDA library.",
+        "methods": (
+            ("plan(node, name, action='set', contents=None, owned_library=None, max_content_bytes=262144)", "read", "Preflight an owned-library plain-section mutation."),
+            ("read(node, name, owned_library=None, max_content_bytes=262144)", "read", "Read one bounded plain-text section."),
+            ("apply(node, name, action='set', contents=None, owned_library=None, allow_library_write=False, create_backup=True, max_content_bytes=262144)", "library-write", "Set or delete one non-managed section with explicit consent."),
+        ),
+    },
+    {
+        "name": "ctx.hda_create",
+        "purpose": "Create one new externally stored HDA from an explicit non-HDA source node.",
+        "methods": (
+            ("plan(node, type_name, label, destination_library, min_inputs=0, max_inputs=0)", "read", "Preflight a new non-overwriting HDA library and source conversion."),
+            ("create_owned(node, type_name, label, destination_library, min_inputs=0, max_inputs=0, allow_library_write=False)", "library-write/scene-mutation/install", "Create, install, and re-resolve one new HDA definition with explicit consent."),
+        ),
+    },
+    {
+        "name": "ctx.hda_interface",
+        "purpose": "Plan and author a bounded declarative parameter interface in one explicitly owned HDA definition.",
+        "methods": (
+            ("plan(node, items, owned_library=None, conflict_policy='error', max_items=25, max_depth=1)", "read", "Validate supported float/int/string/toggle/menu templates and conflicts."),
+            ("apply(node, items, owned_library=None, conflict_policy='error', allow_library_write=False, create_backup=True, max_items=25, max_depth=1)", "library-write/scene-mutation", "Checkpoint contents, author the interface, and synchronize the sole instance."),
+            ("plan_defaults_from_current(node, names, owned_library=None, max_items=25, max_components=4)", "read", "Plan explicit supported tuple defaults from current values."),
+            ("set_defaults_from_current(node, names, owned_library=None, allow_library_write=False, create_backup=True, max_items=25, max_components=4)", "library-write/scene-mutation", "Checkpoint and persist explicit current tuple values as defaults."),
+        ),
+    },
+    {
+        "name": "ctx.hda_tools",
+        "purpose": "Inspect or manage one structured SOP/COP Tools.shelf registration.",
+        "methods": (
+            ("inspect(node, max_items=100)", "read", "Inspect bounded tool names without returning opaque XML."),
+            ("plan(node, action='set', submenu=None, context=None, owned_library=None)", "read", "Preflight a structured Tools.shelf set/remove."),
+            ("set(node, submenu, context, owned_library=None, allow_library_write=False, create_backup=True)", "library-write", "Generate and set one SOP/COP tab-menu tool."),
+            ("remove(node, owned_library=None, allow_library_write=False, create_backup=True)", "library-write", "Remove Tools.shelf with explicit consent."),
+        ),
+    },
+    {
+        "name": "ctx.hda_update",
+        "purpose": "Guarded whole-definition update for one sole unlocked instance in an explicitly owned library.",
+        "methods": (
+            ("update_owned(node, owned_library, allow_library_write=False, contents=True, interface=False, preserve_sections=True, preserve_tools=True, create_backup=True, match_current=False, validate=True, validation_cook=False, max_sections=100, max_section_bytes=1048576, max_total_section_bytes=8388608, max_library_bytes=536870912)", "library-write/scene-mutation", "Checkpoint contents, optionally copy the whole interface, preserve bounded text sections, and validate."),
+        ),
+    },
+    {
         "name": "ctx.python",
         "purpose": "Python SOP/COP #bind inspection, validation, and interface synchronization.",
         "methods": (
@@ -118,6 +162,16 @@ CAPABILITIES: tuple[dict[str, Any], ...] = (
             ("inspect(artifact, max_bytes=67108864)", "file-read", "Read bounded artifact metadata."),
             ("list(max_items=50)", "file-read", "List bounded artifact manifests."),
             ("remove(artifact)", "file-delete", "Delete one artifact."),
+        ),
+    },
+    {
+        "name": "ctx.recipes",
+        "purpose": "Bounded recipe metadata plus script-suppressed node/parameter preset application.",
+        "methods": (
+            ("list(category=None, visible_only=False, max_items=100, max_scan=1000, max_recipe_bytes=262144, max_errors=100)", "read", "Discover bounded recipe metadata without script bodies."),
+            ("get(recipe_key, max_recipe_bytes=262144)", "read", "Inspect one bounded recipe summary."),
+            ("apply_node_preset(recipe_key, node, max_items=100)", "scene-mutation", "Apply only preset parms with scripts and structural surfaces disabled."),
+            ("apply_parm_preset(recipe_key, parm, multiparm_operation='', multiparm_start_index=0)", "scene-mutation", "Apply a parameter preset with scripts disabled."),
         ),
     },
 )

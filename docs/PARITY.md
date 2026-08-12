@@ -9,9 +9,9 @@ compound invariants, artifact boundaries, and explicit helper-owned effects.
 
 The current result is API-level parity for ordinary HOM work and strong
 semantic parity for bounded inspection plus selected synchronization families.
-It is not yet feature parity for broad HDA lifecycle/update/create operations,
-HDA sections/tools, shelf/recipe management, cross-session transfer
-orchestration, or every file-producing command.
+It is not yet feature parity for broad HDA install/uninstall lifecycle operations,
+full parameter-interface authoring, recipe authoring/tool/decoration apply, or
+every file-producing command.
 
 | CLI family | Code Mode surface | Status |
 | --- | --- | --- |
@@ -23,9 +23,10 @@ orchestration, or every file-producing command.
 | `opencl validate`, `opencl sync` | `ctx.opencl.validate`, `sync` | Behavioural parity across SOP, COP, and DOP for binding rows, generated controls, COP signatures, named connection restoration, value preservation, invalid-input disconnection, details, and mutation events. |
 | `python` binding workflows | `ctx.python.inspect`, `validate`, `sync` | Python SOP and Python COP `#bind` interface parity, including dry-run/bindings-only/prune/value-preservation options where applicable. |
 | `wrangle` spare sync | `ctx.wrangle.sync`, `clear` | Spare-parameter synchronization parity. Wrangle creation/configuration is ordinary raw HOM. |
-| `xfer` | `ctx.artifacts.export_node`, `inspect`, `import_node`, `list`, `remove` | Same-session node/network artifact round trip is implemented with `.asData` kept on disk and only a bounded manifest returned. Narrow value/parm/input inverses are selected only when the captured root scope permits them; full artifacts correctly retain `setFromData`. Legacy cross-session `xfer copy` remains host/CLI orchestration, not a `ctx` operation. |
-| `hda` | `ctx.hda.inspect`, `definitions`, `libraries`, `references`, `validate`, `plan_promotion`, `plan_update`, `package_copy`, `apply_promotion`; raw `hou` | Bounded discovery/auditing/validation and no-effect plans are implemented. `package_copy(...)` stages then atomically publishes one definition to an explicit destination library that is not loaded, without installing it or saving the HIP. `apply_promotion(...)` is live-proven only for one isolated HDA instance and an exact owned external library, with `allow_library_write=True`; it writes the interface, channel references, and definition. Broad create/update, sections, tools, and general promotion parity remain out of scope. |
-| `shelf`, `recipe`, structured `help` | raw `hou`, host-side prepared help, Code Mode skill | Not mirrored. These are either thin HOM surfaces, host knowledge, or external-effect workflows that need a separate design. |
+| `xfer` | `ctx.artifacts.*`; operator CLI `houdini-codemode xfer copy` | Same-session artifact round trip is bounded and manifest-only. `xfer copy` is deliberately host orchestration, not a `ctx` operation: it requires explicit distinct loopback endpoints, preflights their shared artifact root, restores under an explicit parent/name, cleans the artifact, and never saves either HIP. It is live-proven from 18811 to 18814; a successful transfer leaves the destination node and can dirty that unsaved HIP. |
+| `hda` | `ctx.hda.*`, `ctx.hda_create`, `ctx.hda_sections`, `ctx.hda_tools`, `ctx.hda_interface`, `ctx.hda_update`; raw `hou` | Guarded workflows include new-library creation from an explicit non-HDA source, package copy, promotion, bounded plain-text sections, structured SOP/COP Tools.shelf, declarative float/int/string/toggle/menu interfaces/defaults, and whole-definition update with bounded text-section preservation. They require explicit consent and report library/scene/install effects without HIP saves. Broad install/uninstall management and general interface parity remain out of scope. |
+| `recipe` | `ctx.recipes.list`, `get`, `apply_node_preset`, `apply_parm_preset` | Bounded recipe metadata is discoverable; node and parameter preset application suppresses recipe pre/post scripts. Recipe authoring plus tool/decoration application remain out of scope. |
+| `shelf`, structured `help` | raw `hou`, host-side prepared help, Code Mode skill | Not mirrored as broad APIs. Structured SOP/COP HDA tools are the intentional narrow exception. |
 
 ## What “one tool” changes
 
@@ -42,10 +43,10 @@ inside the program.
 
 Before claiming full compound parity, the project still needs:
 
-- broad HDA create/update, section/tool mutation, and non-isolated interface
-  workflows beyond the two explicitly constrained library-write primitives;
+- broad HDA install/uninstall lifecycle and non-isolated interface workflows;
+- folders, ramps, callbacks, and multiparms beyond the bounded declarative
+  HDA interface schema;
+- recipe authoring and tool/decoration recipe application;
 - additional explicit durable-output workflows where raw HOM is not sufficient policy;
 - a support matrix beyond the currently tested Houdini 22.0.368/Python 3.11
   runtime;
-- a multiple-live-instance test (real competing local processes against one
-  endpoint are already proven serialized).

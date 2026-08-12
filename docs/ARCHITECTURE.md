@@ -1,7 +1,8 @@
 # Houdini Code Mode Architecture
 
-Status: viability proved; Phases 2 and 4 are substantially complete, Phase 3 is
-complete except multi-instance evidence, and HDA/external-effect work remains.
+Status: viability proved; bounded inspection/operational/compound slices and
+two-endpoint transfer evidence are complete on Houdini 22.0.368. Broad HDA
+install/uninstall lifecycle and interface/recipe authoring work remains.
 
 Last revised: 2026-08-12.
 
@@ -41,6 +42,7 @@ houdini-codemode check --file task.py
 houdini-codemode run --file task.py
 houdini-codemode run --input -
 houdini-codemode doctor
+houdini-codemode xfer copy /obj/source --to-parent /obj --from-port 18811 --to-port 18814
 ```
 
 The architectural shorthand is:
@@ -168,6 +170,14 @@ Diagnostics go to stderr.
 
 `doctor` verifies dependencies, endpoint reachability, Houdini identity,
 runtime installation, and main-thread dispatch with a read-only program.
+
+`xfer copy` is an operator-only host orchestration command, not a second MCP
+tool and not a `ctx` method. It requires explicit distinct loopback source and
+destination ports, validates their shared bounded artifact root, transfers a
+unique artifact, restores below an explicit destination parent/name, and
+cleans the artifact on both endpoint views. A completed copy leaves the
+destination node by contract and can dirty that HIP; it reports cleanup state
+and never saves either HIP.
 
 ### 4.3 Result envelope
 
@@ -382,12 +392,19 @@ Implemented extensions:
   fresh-instance/frame-cook/external-reference validation;
 - H22-compatible external-reference auditing and no-effect parameter promotion
   and package/update planning;
+- owned-library/sole-instance HDA mutations: bounded UTF-8 plain-text sections,
+  structured SOP/COP Tools.shelf registration, a narrow declarative
+  float/int/string/toggle/menu interface, explicit supported
+  defaults-from-current, and constrained `ctx.hda_update.update_owned`;
+- bounded recipe metadata plus script-suppressed node/parameter preset apply;
 - transactional, byte-capped Copernicus image export/import;
 - bounded in-runtime extension discovery from a static registry.
 
 Later extensions:
 
-- HDA parameter-promotion and package/update mutation;
+- broad HDA install/uninstall lifecycle, multi-instance updates, and general
+  interface authoring (folders, ramps, callbacks, multiparms);
+- recipe authoring and tool/decoration recipe application;
 - additional policy-rich durable-output effects.
 
 Do not add helpers merely for basic node lifecycle/wiring, ordinary parameter
@@ -395,9 +412,9 @@ operations, frame or selection reads, simple HDA calls, or broad HOM discovery.
 Generated code uses raw `hou` for those.
 
 OpenCL validation and synchronization, Python binding workflows, wrangle spare
-synchronization, geometry/Copernicus/LOP summaries, and bounded HDA validation
-are implemented. HDA packaging remains later because it mixes external file and
-library effects with definition mutation.
+synchronization, geometry/Copernicus/LOP summaries, bounded HDA validation,
+and the constrained HDA library-write workflows above are implemented. They do
+not establish broad HDA lifecycle or interface parity.
 
 ## 8. Mutations, undo, and saving
 
@@ -466,12 +483,18 @@ houdini_codemode/
         runtime_hda_source.py
         runtime_hda_reference_source.py
         runtime_hda_promotion_source.py
+        runtime_hda_interface_source.py
+        runtime_hda_section_source.py
+        runtime_hda_tool_source.py
         runtime_hda_update_source.py
+        runtime_hda_update_owned_source.py
         runtime_help_source.py
         runtime_lop_source.py
         runtime_opencl_source.py
         runtime_python_source.py
         runtime_wrangle_source.py
+        runtime_recipe_source.py
+        xfer.py
         mcp_server.py
         transport/
             __init__.py
@@ -527,6 +550,7 @@ errors, and oversized data remain bounded.
 - validate undo behaviour across supported Houdini contexts;
 - add explicit artifact policy;
 - test multiple endpoints and competing callers;
+- prove a bounded host-orchestrated transfer between explicit endpoints;
 - version/hash-cache the Houdini runtime.
 
 ### Phase 4: compound extensions
@@ -546,7 +570,12 @@ errors, and oversized data remain bounded.
 - narrowly scoped staged HDA package copy to an unloaded external library;
 - isolated parameter-template promotion with explicit owned-library consent and
   a pre-synchronization content checkpoint;
-- broad HDA create/update, section/tool, and multi-instance workflows remain;
+- bounded owned-library plain-text sections, structured SOP/COP tools, narrow
+  declarative interface/defaults-from-current, and constrained update-owned;
+- broad HDA install/uninstall, multi-instance, and general interface workflows
+  remain; folders, ramps, callbacks, and multiparms are excluded;
+- bounded recipe metadata and script-suppressed node/parameter presets;
+- recipe authoring and tool/decoration apply remain;
 - mutation dry-run plans and explicit library event reporting.
 
 ### Phase 6: sharing decision
@@ -568,9 +597,11 @@ errors, and create/connect/inspect/delete isolated unique networks. They cover
 bounded node/parm inspection and `.asData` timing, artifact round trips,
 Python and wrangle binding synchronization, OpenCL sync across SOP/COP/DOP,
 geometry/Copernicus/LOP/HDA summaries, HDA reference auditing, Copernicus image
-export/import, undo grouping without rollback, and both MCP adapters. They set
-and verify display/render flags where applicable, clean up in `finally`, and
-never save the HIP.
+export/import, bounded HDA sections/tools/interface/defaults/update-owned,
+script-suppressed recipes, undo grouping without rollback, and both MCP
+adapters. They also copy a throwaway node/network from 18811 to 18814 through
+the public operator CLI, verify the restored result, clean artifacts and test
+nodes in `finally`, and never save either HIP.
 
 Live mutation tests may mark the open HIP dirty even when all temporary nodes are
 removed. Test output and handoff notes must state that clearly.
@@ -588,18 +619,19 @@ Open questions after the implemented foundations:
 3. Which inexpensive direct-HOM mutation signals add value without broad scans?
 4. Which external-effect operations need confirmation above the trusted-local executor?
 5. When does a shared package become cheaper than behavioural porting?
-6. Which planned HDA mutation should be admitted first: package/update or
-   parameter promotion?
+6. Which broad HDA lifecycle or interface feature should be admitted first
+   after the constrained owned-library workflows?
 7. How should completion be surfaced after an initial caller has already
    received `completion: unknown`?
 
 ## 14. Current milestone and next target
 
-On 2026-08-12 the project collected 94 automated tests: 93 passed and one
-optional distinct-port test skipped. The passing set includes live tests
-against Houdini 22.0.368 on the default port. The same transport-neutral
-controller serves the CLI, an in-memory MCP 2026-07-28 client, and a spawned MCP
-stdio process while exposing exactly one model-facing tool.
+On 2026-08-12 the project collected 155 automated tests: **155 passed** with
+`HOUDINI_CODEMODE_SECOND_PORT=18814`. The passing set includes live tests
+against two Houdini 22.0.368/Python 3.11 sessions on ports 18811 and 18814. The
+same transport-neutral controller serves the CLI, an in-memory MCP 2026-07-28
+client, and a spawned MCP stdio process while exposing exactly one model-facing
+tool.
 
 The milestone now includes:
 
@@ -612,11 +644,18 @@ The milestone now includes:
 - HDA external-reference audit/validation and promotion planning;
 - manifest-only `.asData` node/network artifacts with a live round trip and
   focused narrow-inverse payload coverage;
+- explicit-port host-orchestrated `xfer copy` with a unique bounded artifact,
+  destination restore/verification, cleanup reporting, and `hip_saved=False`
+  for both endpoints; successful transfer intentionally leaves its destination
+  node and can dirty that unsaved HIP;
 - transactional Copernicus raw image export/import with live file/temp cleanup;
 - a packaged Code Mode skill, version-matched help preparation script, migrated
   Copernicus/VEX/OpenCL guidance, and bounded runtime capability discovery;
 - OpenCL validate/sync across SOP, COP, and DOP, Python SOP/COP binding sync,
   and VEX wrangle spare sync;
+- plain-text HDA sections, structured SOP/COP HDA tools, a bounded declarative
+  HDA interface/defaults-from-current, constrained `update_owned`, and bounded
+  script-suppressed node/parameter recipes;
 - exact helper-owned mutation/effect events and live proof that undo grouping is
   history organization rather than rollback.
 
@@ -624,9 +663,8 @@ The open HIP was already dirty and remains dirty. The full live cleanup audit
 found no `codemode_*` nodes under `/obj`, `/img`, or `/stage` and no Code Mode
 artifacts. The on-disk HIP was never saved.
 
-The next coherent slice is a deliberate choice of the first admitted HDA
-definition mutation now that promotion and package/update both have no-effect
-plans with explicit library risks.
-Support-matrix and multiple-live-instance testing can proceed independently.
-Two real local controller processes have been proven to serialize against the
-same live endpoint; distinct-port behavior still needs a second Houdini instance.
+The next coherent slice is broad HDA install/uninstall lifecycle or a deliberately
+specified interface feature beyond the current schema; neither should be
+inferred from the constrained owned-library helpers. Recipe authoring and
+tool/decoration application remain separate. Support-matrix coverage beyond
+Houdini 22.0.368/Python 3.11 remains required.

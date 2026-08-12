@@ -133,7 +133,8 @@ Check an item only after its relevant tests or live evidence pass.
       only a bounded manifest/reference through the execution response.
 - [x] Unit-test competing callers, local/Houdini admission, and retained gate lifetime.
 - [x] Prove two real local Code Mode processes serialize against one live endpoint.
-- [ ] Test two live Houdini instances on distinct configured ports.
+- [x] Test two live Houdini 22.0.368 instances on distinct configured ports
+      (18811 and 18814) and prove endpoint isolation.
 - [x] Document recovery from `completion: unknown` and a wedged main thread.
 
 ## Phase 4 — compound extensions
@@ -158,6 +159,10 @@ Check an item only after its relevant tests or live evidence pass.
       artifact also captures flags, position, inputs, or other root state.
 - [x] Prove a snapshot/restore round trip on an isolated network in Houdini
       22.0.368 and report every file/scene side effect explicitly.
+- [x] Add and live-prove host-orchestrated `houdini-codemode xfer copy` from
+      `localhost:18811` to `localhost:18814`: explicit distinct loopback
+      ports, unique bounded artifact, restore under an explicit parent/name,
+      cleanup from both endpoint views, and no HIP save.
 - [ ] Repeat artifact round trips across every additional supported Houdini version.
 - [x] Add and live-test bounded read-only HDA definition/library/instance inspection.
 - [x] Add and live-test bounded HDA validation with a no-effect dry-run plan.
@@ -169,15 +174,32 @@ Check an item only after its relevant tests or live evidence pass.
 - [x] Add and live-test `ctx.hda.package_copy`: stage one definition into an
       explicit external destination library and atomically publish it without
       installing that destination or saving the HIP.
-- [ ] Add broad HDA package/update/create mutation. The completed package-copy
-      primitive is deliberately narrower and does not update the source
-      definition, create an HDA, or mutate sections/tools.
+- [x] Add bounded plain-text `ctx.hda_sections` read/plan/set/delete for one
+      explicitly owned sole-instance HDA library, with consent, backup, and
+      no-HIP-save reporting.
+- [x] Add structured SOP/COP `ctx.hda_tools` inspection and one Tools.shelf
+      set/remove workflow; opaque shelf XML is not exposed as a general API.
+- [x] Add bounded declarative `ctx.hda_interface` authoring plus explicit
+      supported tuple defaults-from-current, each restricted to an owned
+      sole-instance library with backup/no-HIP-save reporting.
+- [x] Add and live-test `ctx.hda_update.update_owned` for one sole unlocked
+      instance, with verified backup, bounded text section/tool preservation,
+      optional whole-interface copy, match, and validation.
+- [x] Add bounded `ctx.recipes` metadata discovery and script-suppressed node
+      and parameter preset application.
+- [x] Add and live-test narrow `ctx.hda_create.create_owned` for a new external
+      library from an explicit non-HDA source, reporting unavoidable install
+      and node-type conversion effects.
+- [ ] Add broad HDA install/uninstall lifecycle. Raw HOM remains the surface for
+      general loaded-library management.
 - [x] Add and test a no-effect parameter-template promotion planner.
 - [x] Add and live-test durable isolated `ctx.hda.apply_promotion`, requiring
       `allow_library_write=True`, an exact explicitly owned external library,
       and a sole verified instance before it writes the definition/library.
-- [ ] Add broad parameter-template/interface mutation. Promotion apply remains
-      intentionally scoped and does not establish general HDA update parity.
+- [ ] Add broad parameter-template/interface mutation: folders, ramps,
+      callbacks, and multiparms remain outside the narrow declarative schema.
+- [ ] Add recipe authoring and tool/decoration recipe application. Existing
+      preset application suppresses recipe scripts by design.
 - [x] Report artifact file and restored-scene side effects explicitly.
 - [x] Report package-copy and promotion library/scene mutation events, before/
       after file manifests, install state, and `hip_saved=False` explicitly.

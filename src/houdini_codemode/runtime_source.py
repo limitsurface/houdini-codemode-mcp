@@ -10,15 +10,21 @@ from .runtime_cop_source import COP_SOURCE
 from .runtime_geometry_source import GEOMETRY_SOURCE
 from .runtime_hda_source import HDA_SOURCE
 from .runtime_hda_package_source import HDA_PACKAGE_SOURCE
+from .runtime_hda_interface_source import HDA_INTERFACE_SOURCE
+from .runtime_hda_create_owned_source import HDA_CREATE_OWNED_SOURCE
 from .runtime_hda_promotion_apply_source import HDA_PROMOTION_APPLY_SOURCE
 from .runtime_hda_promotion_source import HDA_PROMOTION_SOURCE
 from .runtime_hda_reference_source import HDA_REFERENCE_SOURCE
+from .runtime_hda_section_source import HDA_SECTION_SOURCE
+from .runtime_hda_tool_source import HDA_TOOL_SOURCE
 from .runtime_hda_update_source import HDA_UPDATE_SOURCE
+from .runtime_hda_update_owned_source import HDA_UPDATE_OWNED_SOURCE
 from .runtime_help_source import HELP_SOURCE
 from .runtime_lop_source import LOP_SOURCE
 from .runtime_opencl_source import OPENCL_SOURCE
 from .runtime_parm_reference_source import PARM_REFERENCE_SOURCE
 from .runtime_python_source import PYTHON_SOURCE
+from .runtime_recipe_source import RECIPE_SOURCE
 from .runtime_wrangle_source import WRANGLE_SOURCE
 
 
@@ -1359,10 +1365,16 @@ class _HCMContext:
         self.cop_files = _HCMCopFileService(mutation_events)
         self.lop = _HCMLopService(mutation_events)
         self.hda = _HCMHdaService(mutation_events)
+        self.hda_create = _HCMHdaCreateOwnedService(mutation_events)
+        self.hda_interface = _HCMHdaInterfaceService(mutation_events)
+        self.hda_sections = _HCMHdaSectionService(mutation_events)
+        self.hda_tools = _HCMHdaToolService(mutation_events)
+        self.hda_update = _HCMHdaUpdateOwnedService(mutation_events)
         self.opencl = _HCMOpenCLService(mutation_events)
         self.python = _HCMPythonService(mutation_events)
         self.wrangle = _HCMWrangleService(mutation_events)
         self.artifacts = _HCMArtifactService(mutation_events)
+        self.recipes = _HCMRecipeService(mutation_events)
         self.help = _HCMHelpService()
 
     def capabilities(self, query=None, max_items=50):
@@ -1687,5 +1699,11 @@ RUNTIME_SOURCE += "\n" + HDA_PROMOTION_SOURCE
 RUNTIME_SOURCE += "\n" + HDA_UPDATE_SOURCE
 RUNTIME_SOURCE += "\n" + HDA_PROMOTION_APPLY_SOURCE
 RUNTIME_SOURCE += "\n" + HDA_PACKAGE_SOURCE
+RUNTIME_SOURCE += "\n" + HDA_CREATE_OWNED_SOURCE
+RUNTIME_SOURCE += "\n" + HDA_INTERFACE_SOURCE
+RUNTIME_SOURCE += "\n" + HDA_SECTION_SOURCE
+RUNTIME_SOURCE += "\n" + HDA_TOOL_SOURCE
+RUNTIME_SOURCE += "\n" + HDA_UPDATE_OWNED_SOURCE
+RUNTIME_SOURCE += "\n" + RECIPE_SOURCE
 RUNTIME_SOURCE += "\n" + HELP_SOURCE
 RUNTIME_SOURCE_HASH = hashlib.sha256(RUNTIME_SOURCE.encode("utf-8")).hexdigest()
