@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "houdini-codemode"
+version = "0.2.0"
+description = "Trusted local code-mode execution for a live Houdini session."
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.11"
+dependencies = [
+  "mcp>=2,<3",
+  "rpyc>=5.3,<6",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=8,<9",
+]
+
+[project.scripts]
+houdini-codemode = "houdini_codemode.cli:main"
+houdini-codemode-mcp = "houdini_codemode.mcp_server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["houdini_codemode*"]
+
+[tool.setuptools.data-files]
+"share/houdini-codemode/shelf_script" = ["shelf_script/start_houdini_codemode_server.py"]
+"share/houdini-codemode/skills/houdini-codemode" = ["skills/houdini-codemode/SKILL.md"]
+"share/houdini-codemode/skills/houdini-codemode/agents" = ["skills/houdini-codemode/agents/openai.yaml"]
+"share/houdini-codemode/skills/houdini-codemode/scripts" = ["skills/houdini-codemode/scripts/prepare_houdini_help.py"]
+"share/houdini-codemode/skills/houdini-codemode/references" = [
+  "skills/houdini-codemode/references/copernicus.md",
+  "skills/houdini-codemode/references/copernicus-kernel-reference-index.md",
+  "skills/houdini-codemode/references/opencl-sops.md",
+  "skills/houdini-codemode/references/opencl-dops.md",
+  "skills/houdini-codemode/references/recipes.md",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = [
+  "live: requires a running Houdini hrpyc server",
+]

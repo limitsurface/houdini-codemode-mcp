@@ -1,0 +1,22 @@
+.tmp/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+dist/
+build/
+*.egg-info/
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Skill-local, version-matched SideFX help input/output
+skills/houdini-codemode/help/
+skills/houdini-codemode/references/help_prepared/

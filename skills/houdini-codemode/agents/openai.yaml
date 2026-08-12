@@ -1,0 +1,4 @@
+interface:
+  display_name: "Houdini Code Mode"
+  short_description: "Compose safe programs for live Houdini"
+  default_prompt: "Use $houdini-codemode to inspect and modify the live Houdini scene in one verified program."
