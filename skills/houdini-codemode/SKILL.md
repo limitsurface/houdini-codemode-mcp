@@ -65,6 +65,7 @@ Never save the HIP unless the user explicitly asks.
 ## Choose the scene implementation
 
 - Prefer native Houdini nodes when they express the operation clearly.
+- To match Tab-menu defaults for `copytopoints::2.0`, press `resettargetattribs` after raw HOM creation.
 - Prefer VEX for custom geometry processing that can run over points,
   primitives, or vertices. Use Detail Wrangles for genuinely sequential or
   topology-wide coordination, small global work, and prototypes.
