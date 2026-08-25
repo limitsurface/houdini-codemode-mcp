@@ -27,7 +27,7 @@ def test_mcp_2026_exposes_exactly_one_tool_and_delegates(monkeypatch) -> None:
         async with Client(mcp_module.mcp) as client:
             listed = await client.list_tools()
             assert client.protocol_version == "2026-07-28"
-            assert client.server_info.version == "0.2.0"
+            assert client.server_info.version == "0.3.1"
             assert [tool.name for tool in listed.tools] == ["houdini_code_run"]
             assert "ctx.capabilities()" in listed.tools[0].description
             assert "ctx.help('ctx.service.method')" in listed.tools[0].description
