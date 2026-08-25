@@ -1,120 +1,110 @@
-# Houdini Code Mode
+# Houdini Code Mode MCP
 
-Houdini Code Mode executes one self-contained Python/HOM program inside a live,
-trusted local Houdini session and returns one bounded structured result.
+Houdini Code Mode gives agents one MCP tool for working in a live Houdini
+session. Each call runs a self-contained Python program with the full Houdini
+Python API, focused `ctx` extensions for compound workflows, and a prepared
+skill with practical guidance and searchable, version-matched Houdini help.
 
-The model-facing surface is one MCP tool, `houdini_code_run`. A small CLI uses
-the same controller for development and diagnosis, plus an operator-only
-same-host transfer command; it does not add an MCP tool or a `ctx` method.
+Submitted code runs locally with the permissions of the Houdini process. Code
+Mode never saves the HIP file implicitly.
 
-The initial viability, bounded inspection foundation, operational runtime, and
-first compound extensions are implemented. See:
+## Install
 
-- [Architecture](docs/ARCHITECTURE.md)
-- [Implementation checklist](docs/CHECKLIST.md)
-- [CLI parity and deliberate differences](docs/PARITY.md)
-- [Support matrix](docs/SUPPORT.md)
+Requires Python 3.11 or newer and a local Houdini installation.
 
-## Houdini setup
+### 1. Install the MCP server
+
+Install the server with `pipx`:
+
+```powershell
+python -m pip install --user pipx
+python -m pipx ensurepath
+python -m pipx install git+https://github.com/limitsurface/houdini-codemode.git
+```
+
+Then add `houdini-codemode-mcp` as a stdio MCP server in your MCP harness. A
+typical server entry is:
+
+```json
+{
+  "command": "houdini-codemode-mcp"
+}
+```
+
+### 2. Add the Houdini shelf script
 
 Create a Python shelf tool in Houdini and paste in
 [`shelf_script/start_houdini_codemode_server.py`](shelf_script/start_houdini_codemode_server.py).
-Run it and choose a port. The supplied server binds only to `127.0.0.1`; the
-initial product is intentionally local and trusted rather than a network
-execution service.
+Run the shelf tool and choose a port. The server binds only to `127.0.0.1` and
+is intended for trusted local use.
 
-The controller installs its Houdini-side runtime on the first request and then
-reuses it while its source hash and runtime version match. Restarting Houdini
-simply causes the next request to install the runtime again.
+The Houdini-side runtime is installed on the first request and reused until its
+source or version changes. Restarting Houdini is fine; the next request installs
+the runtime again.
 
-## Development
+### 3. Install the skill and prepare Houdini help
 
-```powershell
-uv sync
-uv run pytest
-```
+Copy [`skills/houdini-codemode`](skills/houdini-codemode) into the skill
+directory used by your agent harness.
 
-With Houdini's hrpyc server running on the default port:
+The skill includes its help-preparation script, but not SideFX's generated help
+corpus. Locate the help directory in your Houdini installation and run:
 
 ```powershell
-uv run houdini-codemode doctor
-uv run houdini-codemode run --code "result.emit(hou.applicationVersionString())"
-uv run pytest -m live
+python <installed-skill>\scripts\prepare_houdini_help.py `
+  --source "C:\Program Files\Side Effects Software\Houdini xx.x.xxx\houdini\help"
 ```
 
-With separate local Houdini sessions on ports 18811 and 18814, an operator can
-copy a bounded node/network artifact without saving either HIP:
+This creates `<installed-skill>\references\help_prepared\`, giving the agent a
+searchable reference matched to the installed Houdini version. It does not
+modify the Houdini installation.
 
-```powershell
-uv run houdini-codemode xfer copy /obj/source --to-parent /obj `
-  --from-port 18811 --to-port 18814 --name restored --children
-```
+## Extension highlights
 
-`xfer copy` is host orchestration: it requires explicit distinct loopback
-ports, verifies a shared bounded artifact root, generates a unique temporary
-artifact, restores under the requested destination parent/name, and reports
-artifact cleanup. A successful copy intentionally leaves the restored node in
-the destination scene, which can make that HIP dirty, but never saves it.
+### Copernicus and OpenCL
 
-Run the local stdio MCP server with:
+Copernicus-focused OpenCL extensions remove much of the binding and testing
+friction around custom COP kernels. They provide binding synchronization,
+validation, image import/export, and guidance for Houdini's coordinate,
+sampling, and layer conventions.
 
-```powershell
-uv run houdini-codemode-mcp
-```
+### HDA packaging
 
-Submitted source is trusted and unsandboxed. It has the permissions of the
-Houdini process. The runtime never saves the HIP implicitly. A wait timeout does
-not cancel remote Python; a background waiter retains the shared endpoint gate
-until Houdini returns, and `meta.completion` remains `unknown` to the caller.
+HDA tooling supports efficient, guarded asset packaging: inspect and validate
+definitions, audit references, plan promotion, create or copy libraries, build
+interfaces and tools, preserve text sections, and update explicitly owned
+assets without implicitly saving the scene.
 
-## Program context
+### Bounded inspection and artifacts
 
-Each run receives fresh `hou`, `ctx`, `args`, and `result` globals. Raw `hou`
-provides the full Houdini API. Current semantic extensions include:
+Focused summaries make nodes, parameters, geometry, Copernicus networks, LOPs,
+and HDAs practical to inspect without flooding the model context. When a
+workflow needs lossless node or network state, bounded artifacts keep the large
+payload on disk and return a compact manifest instead.
 
-- bounded node, parameter, geometry, Copernicus, LOP, and HDA inspection plus
-  dry-run/fresh-instance/reference HDA validation plus promotion and
-  package/update planning;
-- OpenCL validation and synchronization across SOP, COP, and DOP;
-- Python SOP/COP binding and VEX wrangle spare-parameter synchronization;
-- bounded, manifest-only `.asData` node/network artifacts;
-- operator-only same-host `xfer copy` between explicit local sessions;
-- bounded plain-text HDA sections, structured SOP/COP HDA tools, and a narrow
-  declarative HDA interface (including explicit defaults-from-current);
-- guarded owned-library HDA contents/whole-interface update with bounded text
-  section preservation, verified backup, and validation;
-- narrow new-library HDA creation from an explicit non-HDA source node, with
-  unavoidable install/type-conversion effects reported;
-- bounded recipe metadata plus script-suppressed node and parameter presets;
-- audited, transactional Copernicus image file import/export.
+## Using Code Mode
 
-Call `result.emit(value)` at most once. Prefer summary, then bounded projection,
-then an artifact reference; do not emit broad raw `.asData` payloads.
+The MCP surface contains one tool: `houdini_code_run`. Every run receives fresh
+`hou`, `ctx`, `args`, and `result` globals. Use raw `hou` for the complete HOM
+API and `ctx` for focused extensions.
 
-Discover the current extension surface inside a run instead of guessing:
+Discover the available extension surface inside a run:
 
 ```python
 result.emit(ctx.capabilities())
 ```
 
-Use `ctx.help("ctx.opencl.sync")` for an exact signature, effect category, and
-summary. Clients that support Codex-style skills should install the bundled
-`skills/houdini-codemode` skill for scene-construction, Copernicus, VEX,
-OpenCL, and version-matched local Houdini documentation guidance. The MCP tool
-remains independently usable when a client does not support skills.
+Extension help includes the exact signature, effect category, and summary:
 
-## Version-matched Houdini help
-
-The skill ships the help-preparation script but not SideFX's generated help
-corpus. Locate the raw help directory for the installed Houdini version (for
-example `C:\Program Files\Side Effects Software\Houdini 22.0.368\houdini\help`)
-and run:
-
-```powershell
-python <installed-skill>\scripts\prepare_houdini_help.py `
-  --source "<houdini-install>\houdini\help"
+```python
+result.emit(ctx.help("ctx.opencl.sync"))
 ```
 
-This creates `<installed-skill>\references\help_prepared\` locally. It is
-generated installation data and is intentionally excluded from this repo and
-distribution.
+Call `result.emit(value)` at most once. Prefer a summary, then a bounded
+projection, then an artifact reference.
+
+## Houdini CLI
+
+Houdini Code Mode MCP is the successor to
+[Houdini CLI](https://github.com/limitsurface/houdini-cli). The CLI remains
+available for command-oriented Houdini workflows.

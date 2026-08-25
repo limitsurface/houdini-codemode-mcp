@@ -1,14 +1,11 @@
 ---
 name: houdini-codemode
-description: Work with a live Houdini scene through the one-tool Houdini Code Mode executor using raw HOM plus bounded ctx extensions. Use for scene inspection or mutation, node-network construction, parameters, VEX, OpenCL, Copernicus, DOPs, LOPs/USD, HDAs, artifacts, image file effects, and any task where dependent Houdini work should be composed into one program instead of GUI clicks, legacy CLI eval, or many tiny calls.
+description: Work with a live Houdini scene through the one-tool Houdini Code Mode executor using raw HOM plus bounded ctx extensions. Use for scene inspection or mutation, node-network construction, parameters, VEX, OpenCL, Copernicus, DOPs, LOPs/USD, HDAs, artifacts, image file effects, and any task where dependent Houdini work should be composed into one program.
 ---
 
 # Houdini Code Mode
 
-Use `houdini_code_run` as the model-facing Houdini action. If only the human
-CLI adapter is available, submit the same complete program with
-`houdini-codemode run`; do not fall back to legacy `houdini-cli eval` or manual
-GUI interaction unless the user explicitly requires that surface.
+Use `houdini_code_run` as the model-facing Houdini action.
 
 The program receives fresh `hou`, `ctx`, `args`, and `result` globals. Put
 request data in JSON `args`, never interpolate it into source, and call
@@ -33,7 +30,7 @@ result.emit(ctx.help("ctx.opencl.sync"))
 
 Do not guess `ctx` methods. Current service families include `session`,
 `nodes`, `parms`, `geometry`, `cop`, `cop_files`, `lop`, `hda`, `opencl`,
-`python`, `wrangle`, and `artifacts`.
+`python`, `wrangle`, `viewport`, and `artifacts`.
 
 For unfamiliar or version-sensitive HOM, VEX, node, parameter, recipe, or
 OpenCL APIs, search `references/help_prepared/` with `rg`. This generated corpus
@@ -56,7 +53,8 @@ Avoid a chain of one-call-per-node or one-call-per-parm requests. Loops and
 branching belong inside Houdini, where HOM objects remain local. Do not emit
 HOM objects, full geometry buffers, broad `node.asData()`, or
 `parmsAsData()` payloads. Use `ctx.artifacts` for narrowed lossless node/network
-state and `ctx.cop_files` for audited image effects.
+state, `ctx.cop_files` for audited image effects, and `ctx.viewport.capture`
+for a bounded Scene Viewer PNG that can be inspected outside Houdini.
 
 After creating or rewiring a network, set and verify the intended
 display/render/output flag. Do not leave heavy intermediate nodes displayed.
@@ -122,8 +120,7 @@ protected asset when an editable dive target exists.
 - Treat undo grouping as history organization, not rollback.
 - Keep callers serial per Houdini instance. Arbitrary main-thread Python is not
   safely preemptible.
-- If `meta.completion` is `unknown`, do not retry mutations and do not use the
-  legacy CLI against that instance until completion is independently known or
-  Houdini is restarted.
+- If `meta.completion` is `unknown`, do not retry mutations against that
+  instance until completion is independently known or Houdini is restarted.
 - Use a bounded read-only probe first when a program could wedge Houdini or
   perform broad external effects.

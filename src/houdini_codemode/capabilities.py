@@ -64,6 +64,13 @@ CAPABILITIES: tuple[dict[str, Any], ...] = (
         ),
     },
     {
+        "name": "ctx.viewport",
+        "purpose": "Audited Scene Viewer capture without changing pane state.",
+        "methods": (
+            ("capture(output_path, pane_name=None, index=None, frame=None, width=512, height=512, overwrite=False, max_bytes=67108864)", "file-write", "Capture one bounded Scene Viewer PNG."),
+        ),
+    },
+    {
         "name": "ctx.lop",
         "purpose": "Bounded USD-stage summaries with traversal and path limits.",
         "methods": (("summary(node, output=0, max_depth=None, max_prims=10000, top_types=20, include_paths=False, path_limit=20)", "read/cook", "USD counts, types, paths, and render context."),),

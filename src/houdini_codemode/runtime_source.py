@@ -25,6 +25,7 @@ from .runtime_opencl_source import OPENCL_SOURCE
 from .runtime_parm_reference_source import PARM_REFERENCE_SOURCE
 from .runtime_python_source import PYTHON_SOURCE
 from .runtime_recipe_source import RECIPE_SOURCE
+from .runtime_viewport_source import VIEWPORT_SOURCE
 from .runtime_wrangle_source import WRANGLE_SOURCE
 
 
@@ -1363,6 +1364,7 @@ class _HCMContext:
         self.geometry = _HCMGeometryService()
         self.cop = _HCMCopService()
         self.cop_files = _HCMCopFileService(mutation_events)
+        self.viewport = _HCMViewportService(mutation_events)
         self.lop = _HCMLopService(mutation_events)
         self.hda = _HCMHdaService(mutation_events)
         self.hda_create = _HCMHdaCreateOwnedService(mutation_events)
@@ -1692,6 +1694,7 @@ RUNTIME_SOURCE += "\n" + ARTIFACT_SOURCE
 RUNTIME_SOURCE += "\n" + GEOMETRY_SOURCE
 RUNTIME_SOURCE += "\n" + COP_SOURCE
 RUNTIME_SOURCE += "\n" + COP_FILE_SOURCE
+RUNTIME_SOURCE += "\n" + VIEWPORT_SOURCE
 RUNTIME_SOURCE += "\n" + LOP_SOURCE
 RUNTIME_SOURCE += "\n" + HDA_SOURCE
 RUNTIME_SOURCE += "\n" + HDA_REFERENCE_SOURCE
